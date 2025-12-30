@@ -12,23 +12,30 @@ class Config:
     """Configuración base de la aplicación."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev_key_default')
     
-    # Obtener y limpiar DATABASE_URL
+    # Obtener DATABASE_URL
     raw_db_url = os.getenv('DATABASE_URL', '')
     
-    # Limpiar comillas accidentales y espacios
-    _db_url = raw_db_url.strip().strip("'").strip("\"")
+    # Limpieza profunda de comillas y espacios
+    _db_url = raw_db_url.strip()
+    # Eliminar comillas si están envolviendo la cadena
+    if (_db_url.startswith("'") and _db_url.endswith("'")) or \
+       (_db_url.startswith("\"") and _db_url.endswith("\"")):
+        _db_url = _db_url[1:-1].strip()
+    else:
+        # Por si solo hay una al final o al inicio
+        _db_url = _db_url.strip("'").strip("\"").strip()
     
     if not _db_url:
         logger.warning("DATABASE_URL no está definida o está vacía.")
         SQLALCHEMY_DATABASE_URI = None
     else:
-        # Corregir prefijo para SQLAlchemy 1.4+
+        # Corregir prefijo para SQLAlchemy 1.4+ (solo si no empieza con una comilla ahora)
         if _db_url.startswith("postgres://"):
             _db_url = _db_url.replace("postgres://", "postgresql://", 1)
         
         SQLALCHEMY_DATABASE_URI = _db_url
         
-        # Log de seguridad (solo muestra el host)
+        # Log de seguridad
         _safe_url = _db_url.split('@')[-1] if '@' in _db_url else "URL oculta"
         logger.info(f"SQLALCHEMY_DATABASE_URI configurada: ...@{_safe_url}")
 
