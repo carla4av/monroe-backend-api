@@ -2,8 +2,12 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime
 from extensions import db
 from models import Event, Newsletter
+import os
+from urllib.parse import urlparse
+
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
+
 
 def api_response(status, data=None, message=None, code=200):
     """Helper para estandarizar respuestas JSON."""
@@ -14,12 +18,19 @@ def api_response(status, data=None, message=None, code=200):
     }
     return jsonify(response), code
 
+
 @api_bp.route('/stats', methods=['GET'])
 def health_check():
     """Endpoint de estado para health checks."""
     try:
         # Prueba simple de conexión a DB
         db.session.execute(db.text('SELECT 1'))
+        
+        # Extrae el host del DATABASE_URL
+        db_url = os.environ.get('DATABASE_URL', '')
+        parsed = urlparse(db_url)
+        db_host = parsed.hostname if parsed.hostname else 'unknown'
+        
         return api_response(
             status="ok",
             data={
@@ -34,6 +45,7 @@ def health_check():
             message=f"System check failed: {str(e)}", 
             code=500
         )
+
 
 @api_bp.route('/events/upcoming', methods=['GET'])
 def get_upcoming_events():
@@ -55,6 +67,7 @@ def get_upcoming_events():
             message=f"Error retrieving events: {str(e)}",
             code=500
         )
+
 
 @api_bp.route('/newsletters', methods=['GET'])
 def get_newsletters():
@@ -86,6 +99,7 @@ def get_newsletters():
             message=f"Error retrieving newsletters: {str(e)}",
             code=500
         )
+
 
 @api_bp.route('/newsletters/<int:id>', methods=['GET'])
 def get_newsletter_detail(id):
