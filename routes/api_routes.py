@@ -24,6 +24,7 @@ def health_check():
             status="ok",
             data={
                 "database": "connected",
+                "db_host": db_host,
                 "timestamp": datetime.utcnow().isoformat()
             }
         )
