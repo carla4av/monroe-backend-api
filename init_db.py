@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from app import create_app
 from extensions import db
 from models import Event, Newsletter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 # Cargar entorno explícitamente
@@ -33,7 +33,7 @@ with app.app_context():
                 
                 # Newsletter 1
                 newsletter1 = Newsletter(
-                    title="Monroe Events - Week of January 1, 2025",
+                    subject="Monroe Events - Week of January 1, 2025",
                     content_html="""
                     <h1>Welcome to Monroe Newsletter</h1>
                     <p>This week's top events in Monroe, Louisiana:</p>
@@ -44,12 +44,12 @@ with app.app_context():
                     </ul>
                     """,
                     is_published=True,
-                    published_at=datetime.utcnow() - timedelta(days=7)
+                    published_at=datetime.now(timezone.utc) - timedelta(days=7)
                 )
                 
                 # Newsletter 2
                 newsletter2 = Newsletter(
-                    title="Monroe Events - Week of December 25, 2024",
+                    subject="Monroe Events - Week of December 25, 2024",
                     content_html="""
                     <h1>Holiday Events in Monroe</h1>
                     <p>Celebrate the season with these local events:</p>
@@ -60,12 +60,12 @@ with app.app_context():
                     </ul>
                     """,
                     is_published=True,
-                    published_at=datetime.utcnow() - timedelta(days=14)
+                    published_at=datetime.now(timezone.utc) - timedelta(days=14)
                 )
                 
                 # Newsletter 3
                 newsletter3 = Newsletter(
-                    title="Monroe Events - Week of December 18, 2024",
+                    subject="Monroe Events - Week of December 18, 2024",
                     content_html="""
                     <h1>Pre-Holiday Events</h1>
                     <p>Don't miss these events before the holidays:</p>
@@ -76,7 +76,7 @@ with app.app_context():
                     </ul>
                     """,
                     is_published=True,
-                    published_at=datetime.utcnow() - timedelta(days=21)
+                    published_at=datetime.now(timezone.utc) - timedelta(days=21)
                 )
                 
                 db.session.add_all([newsletter1, newsletter2, newsletter3])
