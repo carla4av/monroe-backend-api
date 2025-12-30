@@ -12,20 +12,25 @@ class Config:
     """Configuración base de la aplicación."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev_key_default')
     
-    # Manejo de DATABASE_URL para compatibilidad con SQLAlchemy 1.4+
-    _db_url = os.getenv('DATABASE_URL')
+    # Obtener y limpiar DATABASE_URL
+    raw_db_url = os.getenv('DATABASE_URL', '')
+    
+    # Limpiar comillas accidentales y espacios
+    _db_url = raw_db_url.strip().strip("'").strip("\"")
     
     if not _db_url:
-        logger.warning("DATABASE_URL no está definida en el entorno.")
+        logger.warning("DATABASE_URL no está definida o está vacía.")
         SQLALCHEMY_DATABASE_URI = None
     else:
+        # Corregir prefijo para SQLAlchemy 1.4+
         if _db_url.startswith("postgres://"):
             _db_url = _db_url.replace("postgres://", "postgresql://", 1)
         
-        # Ocultar password en logs para seguridad
-        _safe_url = _db_url.split('@')[-1] if '@' in _db_url else "URL malformada"
-        logger.info(f"Base de datos configurada hacia: ...@{_safe_url}")
         SQLALCHEMY_DATABASE_URI = _db_url
+        
+        # Log de seguridad (solo muestra el host)
+        _safe_url = _db_url.split('@')[-1] if '@' in _db_url else "URL oculta"
+        logger.info(f"SQLALCHEMY_DATABASE_URI configurada: ...@{_safe_url}")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
