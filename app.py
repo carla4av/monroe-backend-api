@@ -2,14 +2,23 @@ from flask import Flask, jsonify
 from config import Config
 from extensions import db, cors, limiter
 from routes import api_bp
+import logging
 
 def create_app(config_class=Config):
     """Factory function para crear la aplicación Flask."""
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Verificar configuración crítica
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        app.logger.error("ERROR CRÍTICO: SQLALCHEMY_DATABASE_URI no configurada.")
+
     # Inicializar extensiones
-    db.init_app(app)
+    try:
+        db.init_app(app)
+    except Exception as e:
+        app.logger.error(f"Error al inicializar la base de datos: {str(e)}")
+
     cors.init_app(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
     limiter.init_app(app)
 
@@ -31,7 +40,7 @@ def create_app(config_class=Config):
 
     return app
 
-app = create_app()
-
 if __name__ == '__main__':
+    # Esto solo se ejecuta localmente con `python app.py`
+    app = create_app()
     app.run(host='0.0.0.0', port=5000)
