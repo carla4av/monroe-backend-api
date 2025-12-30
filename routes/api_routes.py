@@ -19,6 +19,24 @@ def api_response(status, data=None, message=None, code=200):
     return jsonify(response), code
 
 
+@api_bp.route('/', methods=['GET'])
+def home():
+    """Endpoint de bienvenida."""
+    return api_response(
+        status="ok",
+        data={
+            "message": "Monroe Newsletter API",
+            "version": "1.0.0",
+            "endpoints": {
+                "health": "/api/v1/stats",
+                "upcoming_events": "/api/v1/events/upcoming",
+                "newsletters": "/api/v1/newsletters",
+                "newsletter_detail": "/api/v1/newsletters/<id>"
+            }
+        }
+    )
+
+
 @api_bp.route('/stats', methods=['GET'])
 def health_check():
     """Endpoint de estado para health checks."""
